@@ -47,21 +47,21 @@ function u = mpc(q, Rot, I, r1, r2, r3, r4, phase, t, c)
         if phase == 0
             % For phase = 0, Front left and Rear right are in contact, so
             % their constraints are non-zero
-%             bineq(24*(i-1)+1:24*i) = [500 * [1; 0; 0; 1];
-%                                       -10 * [1; 0; 0; 1];
-%                                       zeros(16, 1)];
-        bineq(24*(i-1)+1:24*i) = [500 * [1; 1; 1; 1];
-                                              -10 * [1; 1; 1; 1];
-                                              zeros(16, 1)];
+            bineq(24*(i-1)+1:24*i) = [500 * [1; 0; 0; 1];
+                                      -10 * [1; 0; 0; 1];
+                                      zeros(16, 1)];
+%         bineq(24*(i-1)+1:24*i) = [500 * [1; 1; 1; 1];
+%                                               -10 * [1; 1; 1; 1];
+%                                               zeros(16, 1)];
         else
             % For phase = 1, Front right and Rear left are in contact, so
             % their constraints are non-zero
-%             bineq(24*(i-1)+1:24*i) = [500 * [0; 1; 1; 0];
-%                                       -10 * [0; 1; 1; 0];
-%                                       zeros(16, 1)];
-bineq(24*(i-1)+1:24*i) = [500 * [1; 1; 1; 1];
-                                              -10 * [1; 1; 1; 1];
-                                              zeros(16, 1)];
+            bineq(24*(i-1)+1:24*i) = [500 * [0; 1; 1; 0];
+                                      -10 * [0; 1; 1; 0];
+                                      zeros(16, 1)];
+% bineq(24*(i-1)+1:24*i) = [500 * [1; 1; 1; 1];
+%                                               -10 * [1; 1; 1; 1];
+%                                               zeros(16, 1)];
         end
     end
 
