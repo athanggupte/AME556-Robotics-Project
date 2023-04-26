@@ -1,5 +1,6 @@
 function tau = mpc_caller(p, v, w, R, q, p1, p2, p3, p4, t)
 
+gait_length = 0.15;
 tau = zeros(12,1);
 if t < 2
     return;
@@ -8,7 +9,7 @@ end
 R = R';
 
 eul_angles = rotm2eul(R);
-X = [p; eul_angles(3); eul_angles(2); eul_angles(1); v; w; -9.81];
+% X = [p; eul_angles(3); eul_angles(2); eul_angles(1); v; w; -9.81];
 I = diag([0.0168, 0.0565, 0.064]);
 
 r1 = p1 - p;
@@ -19,7 +20,7 @@ r4 = p4 - p;
 phase = 0;
 c = 0;
 while t >= c
-    c = c + 0.2;
+    c = c + gait_length;
     phase = 1-phase;
 end
 
@@ -31,7 +32,16 @@ J_FR = foot_jacobian([q(11); q(7); q(3)], 2);
 J_RL = foot_jacobian([q(10); q(6); q(2)], 3);
 J_RR = foot_jacobian([q(9); q(5); q(1)], 4);
 
-F = mpc(X, R, I, r1, r2, r3, r4, phase, t, c);
+% F = mpc(X, R, I, r1, r2, r3, r4, phase, t, c);
+N = 10; dt = 0.03;
+pd = [0; 0; 0.3];
+pddot = [0; 0; 0];
+% m = 12;
+thetad = [0; 0; 0];
+wd = [0; 0; 0;];
+xd = [pd; thetad; pddot; wd];
+X = [p; reshape(R, [9 1]); v; R'*w];
+F = mpc_standing_caller(t, X, r1, r2, r3, r4, xd, dt, N);
 size(F)
 
 

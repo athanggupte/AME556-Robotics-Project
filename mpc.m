@@ -1,7 +1,8 @@
 function u = mpc(q, Rot, I, r1, r2, r3, r4, phase, t, c)
     % Same MPC code as 2b except for constraints
-    N = 50;
+    N = 10;
     dt = 0.01;
+    gait_length = 0.4;
     pd = [0; 0; 0.3];
     pddot = [0; 0; 0];
     m = 12;
@@ -41,7 +42,7 @@ function u = mpc(q, Rot, I, r1, r2, r3, r4, phase, t, c)
         % If t crosses the time limit (c) for the phase, then we update c
         % and change the phase
         if t >= c
-            c = c + 0.2;
+            c = c + gait_length;
             phase = 1-phase;
         end
         if phase == 0

@@ -1,41 +1,50 @@
-function tau = foot_placement_walking(p, R, v, p_hip, p_foot, v_foot, q, t)
+function [tau, pd_foot, vd_foot, Fswing] = foot_placement_walking(p, R, v, p_hip, p_foot, v_foot, q, t)
 
+gait_length = 0.15;
+Fswing = zeros(12, 1);
 tau = zeros(12, 1);
+pd_foot = p_hip + [0.05; 0; 0; 
+                    0.05; 0; 0; 
+                    0.05; 0; 0;
+                    0.05; 0; 0;];
+vd_foot = zeros(12, 1);
 if t < 2
     return;
 end
 
-vd = [0; 0; 0;
+vd_com = [0; 0; 0;
       0; 0; 0;
       0; 0; 0;
       0; 0; 0];
 
-v = [v; v; v; v];
+v_com = [v; v; v; v];
 
 
 R = R';
 
-t_stance = 0.2;
+t_stance = gait_length;
 K_step = sqrt(p(3) / 9.81);
 
-pfinal_foot = p_hip + t_stance / 2 * v + K_step * (v - vd);
+pfinal_foot = p_hip + t_stance / 2 * v_com + K_step * (v_com - vd_com);
 pfinal_foot(3) = 0;
 pfinal_foot(6) = 0;
 pfinal_foot(9) = 0;
 pfinal_foot(12) = 0;
 
-Kp = 10; Kd = 10;
+Kp = 100; Kd = 0.5;
 
 phase = 0;
 c = 0;
 while t >= c
-    c = c + 0.2;
+    c = c + gait_length;
     phase = 1-phase;
 end
-
-[pd_foot, vd_foot] = calculate_foot_trajectory(t, phase);
+c = c - gait_length;
+tswing = gait_length;
+[pd_foot, vd_foot] = calculate_foot_trajectory(t, c, tswing, phase, pd_foot, vd_foot);
 
 Fswing = Kp * (pd_foot - p_foot) + Kd * (vd_foot - v_foot);
+% Fswing = -Fswing;
 
 J_FL = foot_jacobian([q(12); q(8); q(4)], 1);
 J_FR = foot_jacobian([q(11); q(7); q(3)], 2);
@@ -68,10 +77,44 @@ tau = tau.*[phase; 1-phase; 1-phase; phase;
 end
 
 
-function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase)
+function [pd_foot, vd_foot] = calculate_foot_trajectory(t, c, tswing, phase, pd_foot, vd_foot)
 
-pd_foot = zeros(12,1);
-vd_foot = zeros(12,1);
+h = 0.0;
+v = 0;
+
+if phase
+    if t < (c + tswing/2)
+        fprintf("%f FL, RR, up\n", t);
+        pd_foot(3) = (t-c)*2*h/tswing;
+        pd_foot(12) = (t-c)*2*h/tswing;
+        vd_foot(3) = (t-c)*2*v/tswing;
+        vd_foot(12) = (t-c)*2*v/tswing;
+    else
+        fprintf("%f FL, RR, down\n", t);
+        pd_foot(3) = h - (t-c-tswing/2)*2*h/tswing;
+        pd_foot(12) = h - (t-c-tswing/2)*2*h/tswing;
+        vd_foot(3) = v - (t-c-tswing/2)*2*v/tswing;
+        vd_foot(12) = v - (t-c-tswing/2)*2*v/tswing;
+    end
+%     vd_foot(3) = v - (t-c)*2*v/tswing;
+%     vd_foot(12) = v - (t-c)*2*v/tswing;
+else
+    if t < (c + tswing/2)
+        fprintf("%f RL, FR, up\n", t);
+        pd_foot(6) = (t-c)*2*h/tswing;
+        pd_foot(9) = (t-c)*2*h/tswing;
+        vd_foot(6) = (t-c)*2*v/tswing;
+        vd_foot(9) = (t-c)*2*v/tswing;
+    else
+        fprintf("%f RL, FR, down\n", t);
+        pd_foot(6) = h - (t-c-tswing/2)*2*h/tswing;
+        pd_foot(9) = h - (t-c-tswing/2)*2*h/tswing;
+        vd_foot(6) = v - (t-c-tswing/2)*2*v/tswing;
+        vd_foot(9) = v - (t-c-tswing/2)*2*v/tswing;
+    end
+%     vd_foot(6) = v - (t-c)*2*v/tswing;
+%     vd_foot(9) = v - (t-c)*2*v/tswing;
+end
 
 end
 
