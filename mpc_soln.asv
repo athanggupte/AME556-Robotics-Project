@@ -30,37 +30,41 @@ function u = mpc_soln(t,q,r1,r2,r3,r4,xd,Q_mpc,R_mpc,dt,N,gaitname)
     Bt = dt*Bct;
     Q_mpc = blkdiag(Q_mpc,0);
     xd = [xd;9.8];
-    H=zeros(N*(size(Q_mpc,1) + size(R_mpc,1)));
+    H=[];
+    coder.varsize("H");
     for i = 1:N
-        s = (i-1)*size(Q_mpc,1)+1;
-        e = (i)*size(Q_mpc,1);
-        H(s:e, s:e) = Q_mpc;
+        H =  blkdiag(H,Q_mpc);
     end
     for i = 1:N
-        s = N*size(Q_mpc,1)+(i-1)*size(R_mpc,1)+1;
-        e = N*size(Q_mpc,1)+(i)*size(R_mpc,1);
-        H(s:e, s:e) = R_mpc;
+        H =  blkdiag(H,R_mpc);
     end
+%     H = H(2:end, 2:end);
     f_blk = -Q_mpc*xd;
     f=[];
+    coder.varsize("f");
     for i = 1:N
         f = [f;f_blk];
     end
+%     f = f(2:end);
     f = [f;zeros(N*controller_num,1)];
     Aeq_bl1 = eye(state_num*N);
-    Aeq_bl2 =[];
+    Aeq_bl2 = [];
+    coder.varsize("Aeq_bl2");
     for i = 1:N-1
         Aeq_bl2 = blkdiag(Aeq_bl2,-At);
     end
+%     Aeq_bl2 = Aeq_bl2(2:end, 2:end);
     Aeq_bl2 = [zeros(state_num, state_num*N);
         Aeq_bl2, zeros(state_num*(N-1),state_num)];
     Aeq_bl3 =[];
+    coder.varsize("Aeq_bl3");
     for i = 1:N
         Aeq_bl3 = blkdiag(Aeq_bl3,-Bt);
     end
+%     Aeq_bl3 = Aeq_bl3(2:end, 2:end);
     Aeq = [Aeq_bl1+Aeq_bl2 Aeq_bl3];
     Beq = [At*[q0;9.8]; zeros((N-1)*state_num,1)];
-    mu = 0.5;
+    mu = 1;
     Aineq_blk = [1 0 -mu;
         -1 0 -mu;
         0 1 -mu;
@@ -68,11 +72,14 @@ function u = mpc_soln(t,q,r1,r2,r3,r4,xd,Q_mpc,R_mpc,dt,N,gaitname)
         0 0 1;
         0 0 -1];
     A_ineq = [];
+    coder.varsize("A_ineq");
     for i = 1:(N*4)
         A_ineq = blkdiag(A_ineq,Aineq_blk);
     end
+%     A_ineq = A_ineq(2:end, 2:end);
     A_ineq = [zeros(6*N*4,N*state_num) A_ineq];
     b_ineq = [];
+    coder.varsize("b_ineq");
     mpctable = gait(t,N,dt,gaitname);
     for i = 0:N-1
         for j = 1:4
@@ -80,8 +87,10 @@ function u = mpc_soln(t,q,r1,r2,r3,r4,xd,Q_mpc,R_mpc,dt,N,gaitname)
             b_ineq =[b_ineq;b_ineq_blk];
         end
     end
-    options = optimoptions('quadprog','Display','off');
-    X_star = quadprog(H,f,A_ineq,b_ineq,Aeq,Beq,[],[],[],options);
+%     b_ineq = bineq(2:end);
+    coder.extrinsic('quadprog');
+%     options = optimoptions('quadprog','Display','off');
+    X_star = quadprog(H,f,A_ineq,b_ineq,Aeq,Beq,[],[],[]);
     u = X_star(N*state_num+1:N*state_num+controller_num);
 end
 

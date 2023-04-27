@@ -64,7 +64,7 @@ function u = mpc_soln(t,q,r1,r2,r3,r4,xd,Q_mpc,R_mpc,dt,N,gaitname)
 %     Aeq_bl3 = Aeq_bl3(2:end, 2:end);
     Aeq = [Aeq_bl1+Aeq_bl2 Aeq_bl3];
     Beq = [At*[q0;9.8]; zeros((N-1)*state_num,1)];
-    mu = 0.5;
+    mu = 1;
     Aineq_blk = [1 0 -mu;
         -1 0 -mu;
         0 1 -mu;
@@ -94,34 +94,34 @@ function u = mpc_soln(t,q,r1,r2,r3,r4,xd,Q_mpc,R_mpc,dt,N,gaitname)
     u = X_star(N*state_num+1:N*state_num+controller_num);
 end
 
-function mpcTable = gait(t,N,dt,gaitname)
-    if isequal(gaitname, 'standing')
-        offsets = [0,0,0,0];
-        duration = [N,N,N,N];
-    elseif isequal(gaitname, 'trotting')
-        offsets = [0,N/2,N/2,0];
-        duration = [N/2,N/2,N/2,N/2];
-    elseif isequal(gaitname, 'bounding')
-        offsets = [N/2,N/2,0,0];
-        duration = [N/2,N/2,N/2,N/2];
-    end
-    mpcTable = zeros(N*4,1);
-    iteration = floor(mod(t/dt,N));
-    for i = 0:N-1
-        iter = mod((i +1 + iteration),N);
-        progress = iter - offsets;
-        for j = 1:4
-            if progress(j) < 0
-                progress(j) = progress(j) + N;
-            end
-            if progress(j) < duration(j)
-                mpcTable(i*4+j) = 1;
-            else
-                mpcTable(i*4+j) = 0;
-            end
-        end
-    end
-end
+% function mpcTable = gait(t,N,dt,gaitname)
+%     if isequal(gaitname, 'standing')
+%         offsets = [0,0,0,0];
+%         duration = [N,N,N,N];
+%     elseif isequal(gaitname, 'trotting')
+%         offsets = [0,N/2,N/2,0];
+%         duration = [N/2,N/2,N/2,N/2];
+%     elseif isequal(gaitname, 'bounding')
+%         offsets = [N/2,N/2,0,0];
+%         duration = [N/2,N/2,N/2,N/2];
+%     end
+%     mpcTable = zeros(N*4,1);
+%     iteration = floor(mod(t/dt,N));
+%     for i = 0:N-1
+%         iter = mod((i +1 + iteration),N);
+%         progress = iter - offsets;
+%         for j = 1:4
+%             if progress(j) < 0
+%                 progress(j) = progress(j) + N;
+%             end
+%             if progress(j) < duration(j)
+%                 mpcTable(i*4+j) = 1;
+%             else
+%                 mpcTable(i*4+j) = 0;
+%             end
+%         end
+%     end
+% end
 
 function S = Vec2Skewmat(a)
     S = [0 -a(3) a(2);

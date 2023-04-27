@@ -1,12 +1,12 @@
 function [tau, pd_foot, vd_foot, Fswing] = foot_placement_walking(p, R, v, p_hip, p_foot, v_foot, q, t)
 
-gait_length = 0.15;
+gait_length = 0.2;
 Fswing = zeros(12, 1);
 tau = zeros(12, 1);
-pd_foot = p_hip + [0.05; 0; 0; 
-                    0.05; 0; 0; 
-                    0.05; 0; 0;
-                    0.05; 0; 0;];
+pd_foot = p_foot;% - [0.025; 0; 0; 
+                %    0.025; 0; 0; 
+                %    0.025; 0; 0;
+                %    0.025; 0; 0;];
 vd_foot = zeros(12, 1);
 if t < 2
     return;
@@ -25,26 +25,27 @@ R = R';
 t_stance = gait_length;
 K_step = sqrt(p(3) / 9.81);
 
-pfinal_foot = p_hip + t_stance / 2 * v_com + K_step * (v_com - vd_com);
-pfinal_foot(3) = 0;
-pfinal_foot(6) = 0;
-pfinal_foot(9) = 0;
-pfinal_foot(12) = 0;
+% pfinal_foot = p_hip + t_stance / 2 * v_com + K_step * (v_com - vd_com);
+% pfinal_foot(3) = 0;
+% pfinal_foot(6) = 0;
+% pfinal_foot(9) = 0;
+% pfinal_foot(12) = 0;
 
-Kp = 100; Kd = 0.5;
+Kp = 10; Kd = 0.1;
 
-phase = 0;
-c = 0;
-while t >= c
-    c = c + gait_length;
-    phase = 1-phase;
-end
-c = c - gait_length;
+[phase, phase_start] = get_current_phase(t, gait_length);
+% phase_start = phase_start - gait_length;
+
 tswing = gait_length;
-[pd_foot, vd_foot] = calculate_foot_trajectory(t, c, tswing, phase, pd_foot, vd_foot);
+[pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot);
 
 Fswing = Kp * (pd_foot - p_foot) + Kd * (vd_foot - v_foot);
-% Fswing = -Fswing;
+%Fswing = -Fswing;
+Fswing(1:3) = Fswing(1:3) * (1-phase);
+Fswing(4:6) = Fswing(4:6) * (phase);
+Fswing(7:9) = Fswing(7:9) * (phase);
+Fswing(10:12) = Fswing(10:12) * (1-phase);
+
 
 J_FL = foot_jacobian([q(12); q(8); q(4)], 1);
 J_FR = foot_jacobian([q(11); q(7); q(3)], 2);
@@ -68,10 +69,9 @@ tau(7:9) = tau_RL(1:3);
 tau(10:12) = tau_RR(1:3);
 tau = [tau(12); tau(9); tau(6); tau(3); tau(11); tau(8); tau(5); tau(2); tau(10); tau(7); tau(4); tau(1)];
 
-
-tau = tau.*[phase; 1-phase; 1-phase; phase;
-            phase; 1-phase; 1-phase; phase;
-            phase; 1-phase; 1-phase; phase];
+% tau = tau.*[1-phase; phase; phase; 1-phase;
+%             1-phase; phase; phase; 1-phase;
+%             1-phase; phase; phase; 1-phase];
 
 
 end
@@ -79,10 +79,10 @@ end
 
 function [pd_foot, vd_foot] = calculate_foot_trajectory(t, c, tswing, phase, pd_foot, vd_foot)
 
-h = 0.0;
-v = 0;
+h = 0.15;
+v = 1.0;
 
-if phase
+if 1-phase == 1
     if t < (c + tswing/2)
         fprintf("%f FL, RR, up\n", t);
         pd_foot(3) = (t-c)*2*h/tswing;
