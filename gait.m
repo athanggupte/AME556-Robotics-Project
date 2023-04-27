@@ -5,6 +5,9 @@ function mpcTable = gait(t,N,dt,gaitname)
     elseif isequal(gaitname, 'trotting')
         offsets = [0,N/2,N/2,0];
         duration = [N/2,N/2,N/2,N/2];
+    elseif isequal(gaitname, 'trotting_FR')
+        offsets = [0,N/2,0,0];
+        duration = [N,N/2,N,N];
     elseif isequal(gaitname, 'bounding')
         offsets = [N/2,N/2,0,0];
         duration = [N/2,N/2,N/2,N/2];

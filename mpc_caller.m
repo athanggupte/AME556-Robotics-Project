@@ -1,4 +1,4 @@
-function [tau, F] = mpc_caller(p, v, w, R, q, p1, p2, p3, p4, t)
+function [tau, F] = mpc_caller(p, v, w, R, q, p1, p2, p3, p4, t, task)
 
 N = 20; dt = 0.02;
 gait_length = 0.2;
@@ -19,25 +19,24 @@ r2 = p2 - p;
 r3 = p3 - p;
 r4 = p4 - p;
 
-% [phase, phase_start] = get_current_phase(t, gait_length);
-% Now phase is for the next interval, so we should go back
-% phase = 1-phase;
-
 J_FL = foot_jacobian([q(12); q(8); q(4)], 1);
 J_FR = foot_jacobian([q(11); q(7); q(3)], 2);
 J_RL = foot_jacobian([q(10); q(6); q(2)], 3);
 J_RR = foot_jacobian([q(9); q(5); q(1)], 4);
 
 % F = mpc(X, R, I, r1, r2, r3, r4, phase, t, c);
-pd = [0; 0; 0.25];
+pd = [0; 0; 0.3];
 pddot = [0; 0; 0];
 % m = 12;
 thetad = [0; 0; 0];
 wd = [0; 0; 0;];
 xd = [pd; thetad; pddot; wd];
 X = [p; reshape(R, [9 1]); v; R'*w];
-F = mpc_standing_caller(t, X, r1, r2, r3, r4, xd, dt, N);
-%F = -F;
+if task == 0 % standing
+    F = mpc_standing_caller(t, X, r1, r2, r3, r4, xd, dt, N);
+elseif task == 1 % walking
+    F = mpc_walking_caller(t, X, r1, r2, r3, r4, xd, dt, N);
+end
 
 % Convert GRF to Torque
 tau_FL = zeros(3,1);
