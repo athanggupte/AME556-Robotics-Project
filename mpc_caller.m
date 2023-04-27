@@ -1,4 +1,4 @@
-function [tau, F] = mpc_caller(p, v, w, R, q, p1, p2, p3, p4, t, task)
+function [tau, F] = mpc_caller(p, v, w, R, q, vd, p1, p2, p3, p4, t, task)
 
 N = 20; dt = 0.02;
 gait_length = 0.2;
@@ -25,10 +25,10 @@ J_RL = foot_jacobian([q(10); q(6); q(2)], 3);
 J_RR = foot_jacobian([q(9); q(5); q(1)], 4);
 
 % F = mpc(X, R, I, r1, r2, r3, r4, phase, t, c);
-pd = [0; 0; 0.3];
-pddot = [0; 0; 0];
+pd = [p(1)+vd(1)*dt; 0; 0.3];
+pddot = vd;
 % m = 12;
-thetad = [0; 0; 0];
+thetad = [0; pi/12; 0];
 wd = [0; 0; 0;];
 xd = [pd; thetad; pddot; wd];
 X = [p; reshape(R, [9 1]); v; R'*w];

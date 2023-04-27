@@ -22,15 +22,15 @@ R = R';
 t_stance = gait_length;
 K_step = sqrt(p(3) / 9.81);
 
-pdelta_foot = t_stance / 2 * v_com + K_step * (v_com - vd_com);
-pfinal_foot = pdelta_foot;
+pfinal_foot = p_hip + t_stance / 2 * v_com + K_step * (v_com - vd_com);
+
 
 Kp = 120; Kd = 60;
 
 % phase_start = phase_start - gait_length;
 
 tswing = gait_length;
-[pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot);
+[pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pfinal_foot, p_foot);
 
 Fswing = Kp * (pd_foot - p_foot) + Kd * (vd_foot - v_foot);
 Fswing = -Fswing;
@@ -70,18 +70,18 @@ tau = [tau(12); tau(9); tau(6); tau(3); tau(11); tau(8); tau(5); tau(2); tau(10)
 end
 
 
-function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot)
+function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pfinal_foot, p_foot)
 
-h = 0.1;
+h = 0.15;
 dh = 2 * h / tswing;
 
 v_mag = 2 * h / tswing;
 
 if 1-phase == 1
-    pd_foot(1) = pd_foot(1) + (t-phase_start) * pdelta_foot(1) / tswing;
-    pd_foot(10) = pd_foot(10) + (t-phase_start) * pdelta_foot(10) / tswing;
-    vd_foot(1) = pdelta_foot(1) / tswing;
-    vd_foot(10) = pdelta_foot(10) / tswing;
+    pd_foot(1) = (t-phase_start) * pfinal_foot(1) - pd_foot(1) / tswing;
+    pd_foot(10) = (t-phase_start) * 2 * pfinal_foot(10) / tswing;
+    vd_foot(1) = 2 * (pfinal_foot(1) - p_foot(1)) / tswing;
+    vd_foot(10) = 2 * (pfinal_foot(10) - p_foot(10)) / tswing;
     if t < (phase_start + tswing/2)
         pd_foot(3) = (t-phase_start)*dh;
         pd_foot(12) = (t-phase_start)*dh;
@@ -94,10 +94,10 @@ if 1-phase == 1
         vd_foot(12) = -v_mag;
     end
 else
-    pd_foot(4) = pd_foot(4) + (t-phase_start) * pdelta_foot(4) / tswing;
-    pd_foot(7) = pd_foot(7) + (t-phase_start) * pdelta_foot(7) / tswing;
-    vd_foot(4) = pdelta_foot(4) / tswing;
-    vd_foot(7) = pdelta_foot(7) / tswing;
+    pd_foot(4) = (t-phase_start) * 2 * pfinal_foot(4) / tswing;
+    pd_foot(7) = (t-phase_start) * 2 * pfinal_foot(7) / tswing;
+    vd_foot(4) = 2 * (pfinal_foot(4) - p_foot(4)) / tswing;
+    vd_foot(7) = 2 * (pfinal_foot(7) - p_foot(7)) / tswing;
     if t < (phase_start + tswing/2)
         pd_foot(6) = (t-phase_start)*dh;
         pd_foot(9) = (t-phase_start)*dh;
