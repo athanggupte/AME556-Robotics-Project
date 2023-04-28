@@ -24,18 +24,21 @@ J_FR = foot_jacobian([q(11); q(7); q(3)], 2);
 J_RL = foot_jacobian([q(10); q(6); q(2)], 3);
 J_RR = foot_jacobian([q(9); q(5); q(1)], 4);
 
-% F = mpc(X, R, I, r1, r2, r3, r4, phase, t, c);
-pd = [p(1)+vd(1)*dt; 0; 0.3];
-pddot = vd;
-% m = 12;
-thetad = [0; pi/12; 0];
-wd = [0; 0; 0;];
-xd = [pd; thetad; pddot; wd];
 X = [p; reshape(R, [9 1]); v; R'*w];
+
+pd = [0; 0; 0.3];
+pddot = [0; 0; 0];
+% m = 12;
+thetad = [0; 0; 0];
+wd = [0; 0; 0;];
+
 if task == 0 % standing
-    F = mpc_standing_caller(t, X, r1, r2, r3, r4, xd, dt, N);
+    xd = [pd; thetad; pddot; wd];
+    F = mpc_standing_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
 elseif task == 1 % walking
-    F = mpc_walking_caller(t, X, r1, r2, r3, r4, xd, dt, N);
+    pddot = vd;
+    xd = [pd; thetad; pddot; wd];
+    F = mpc_walking_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
 end
 
 % Convert GRF to Torque

@@ -1,4 +1,14 @@
-function mpcTable = gait(t,N,dt,gaitname)
+function mpcTable = gait(t,N,dt,gait_length,gaitname)
+    Nmul = 2 * gait_length / dt;
+    mpcTable = calc_gait(t, Nmul, dt, gaitname);
+    if Nmul < N
+        mpcTable = [mpcTable; mpcTable(1:4*(N-Nmul))];
+    else
+        mpcTable = mpcTable(1:4*N);
+    end
+end
+
+function mpcTable = calc_gait(t,N,dt,gaitname)
     if isequal(gaitname, 'standing')
         offsets = [0,0,0,0];
         duration = [N,N,N,N];

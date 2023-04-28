@@ -22,10 +22,10 @@ R = R';
 t_stance = gait_length;
 K_step = sqrt(p(3) / 9.81);
 
-pdelta_foot = t_stance / 2 * v_com + K_step * (v_com - vd_com);
-pfinal_foot = pdelta_foot;
+pfinal_foot = p_hip + t_stance / 2 * vd_com + K_step * (v_com - vd_com);
+pdelta_foot = pfinal_foot - p_foot;
 
-Kp = 120; Kd = 60;
+Kp = 150; Kd = 75;
 
 % phase_start = phase_start - gait_length;
 
@@ -78,8 +78,8 @@ dh = 2 * h / tswing;
 v_mag = 2 * h / tswing;
 
 if 1-phase == 1
-    pd_foot(1) = pd_foot(1) + (t-phase_start) * pdelta_foot(1) / tswing;
-    pd_foot(10) = pd_foot(10) + (t-phase_start) * pdelta_foot(10) / tswing;
+    pd_foot(1) = p_foot(1) + (t-phase_start) * pdelta_foot(1) / tswing;
+    pd_foot(10) = p_foot(10) + (t-phase_start) *  pdelta_foot(10) / tswing;
     vd_foot(1) = pdelta_foot(1) / tswing;
     vd_foot(10) = pdelta_foot(10) / tswing;
     if t < (phase_start + tswing/2)
@@ -88,14 +88,14 @@ if 1-phase == 1
         vd_foot(3) = v_mag;
         vd_foot(12) = v_mag;
     else
-        pd_foot(3) = h - (t-phase_start-tswing/2)*dh;
-        pd_foot(12) = h - (t-phase_start-tswing/2)*dh;
+        pd_foot(3) = h - (t-phase_start-tswing/2)*dh - 0.01;
+        pd_foot(12) = h - (t-phase_start-tswing/2)*dh - 0.01;
         vd_foot(3) = -v_mag;
         vd_foot(12) = -v_mag;
     end
 else
-    pd_foot(4) = pd_foot(4) + (t-phase_start) * pdelta_foot(4) / tswing;
-    pd_foot(7) = pd_foot(7) + (t-phase_start) * pdelta_foot(7) / tswing;
+    pd_foot(4) = p_foot(4) + (t-phase_start) * pdelta_foot(4) / tswing;
+    pd_foot(7) = p_foot(7) + (t-phase_start) * pdelta_foot(7) / tswing;
     vd_foot(4) = pdelta_foot(4) / tswing;
     vd_foot(7) = pdelta_foot(7) / tswing;
     if t < (phase_start + tswing/2)
@@ -104,8 +104,8 @@ else
         vd_foot(6) = v_mag;
         vd_foot(9) = v_mag;
     else
-        pd_foot(6) = h - (t-phase_start-tswing/2)*dh;
-        pd_foot(9) = h - (t-phase_start-tswing/2)*dh;
+        pd_foot(6) = h - (t-phase_start-tswing/2)*dh - 0.01;
+        pd_foot(9) = h - (t-phase_start-tswing/2)*dh - 0.01;
         vd_foot(6) = -v_mag;
         vd_foot(9) = -v_mag;
     end
