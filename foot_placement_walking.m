@@ -14,7 +14,11 @@ if t < 2
 end
 
 vd_com = [vd;vd;vd;vd];
-v_com = [v; v; v; v];
+if size(v,1) == 12
+    v_com = v;
+else
+    v_com = [v; v; v; v];
+end
 
 
 R = R';
@@ -25,7 +29,7 @@ K_step = sqrt(p(3) / 9.81);
 pfinal_foot = p_hip + t_stance / 2 * vd_com + K_step * (v_com - vd_com);
 pdelta_foot = pfinal_foot - p_foot;
 
-Kp = 150; Kd = 75;
+Kp = 135; Kd = 90;
 
 % phase_start = phase_start - gait_length;
 
@@ -72,8 +76,10 @@ end
 
 function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot)
 
-h = 0.1;
+h = 0.05;
 dh = 2 * h / tswing;
+
+delta_h = 0.02;
 
 v_mag = 2 * h / tswing;
 
@@ -88,8 +94,8 @@ if 1-phase == 1
         vd_foot(3) = v_mag;
         vd_foot(12) = v_mag;
     else
-        pd_foot(3) = h - (t-phase_start-tswing/2)*dh - 0.01;
-        pd_foot(12) = h - (t-phase_start-tswing/2)*dh - 0.01;
+        pd_foot(3) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        pd_foot(12) = h - (t-phase_start-tswing/2)*dh - delta_h;
         vd_foot(3) = -v_mag;
         vd_foot(12) = -v_mag;
     end
@@ -104,8 +110,8 @@ else
         vd_foot(6) = v_mag;
         vd_foot(9) = v_mag;
     else
-        pd_foot(6) = h - (t-phase_start-tswing/2)*dh - 0.01;
-        pd_foot(9) = h - (t-phase_start-tswing/2)*dh - 0.01;
+        pd_foot(6) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        pd_foot(9) = h - (t-phase_start-tswing/2)*dh - delta_h;
         vd_foot(6) = -v_mag;
         vd_foot(9) = -v_mag;
     end

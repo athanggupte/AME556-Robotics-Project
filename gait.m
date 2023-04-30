@@ -25,7 +25,7 @@ function mpcTable = calc_gait(t,N,dt,gaitname)
     mpcTable = zeros(N*4,1);
     iteration = floor(mod(t/dt,N));
     for i = 0:N-1
-        iter = mod((i + iteration), N);
+        iter = mod((i + 1 + iteration), N); 
         progress = iter - offsets;
         for j = 1:4
             if progress(j) < 0

@@ -81,7 +81,7 @@ end
 
 function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot)
 
-h = 0.15;
+h = 0.05;
 v_mag = 2 * h / tswing;
 
 if 1-phase == 1

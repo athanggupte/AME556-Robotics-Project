@@ -26,7 +26,7 @@ J_RR = foot_jacobian([q(9); q(5); q(1)], 4);
 
 X = [p; reshape(R, [9 1]); v; R'*w];
 
-pd = [0; 0; 0.3];
+pd = [0; 0; 0.28];
 pddot = [0; 0; 0];
 % m = 12;
 thetad = [0; 0; 0];
