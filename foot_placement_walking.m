@@ -1,6 +1,6 @@
 function [tau, pd_foot, vd_foot, pfinal_foot, Fswing] = foot_placement_walking(p, R, v, p_hip, p_foot, v_foot, q, vd, t)
 
-gait_length = 0.2;
+gait_length = 0.15;
 Fswing = zeros(12, 1);
 tau = zeros(12, 1);
 vd_foot = zeros(12, 1);
@@ -35,6 +35,12 @@ Kp = 135; Kd = 90;
 
 tswing = gait_length;
 [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot);
+
+foot_correction_mag = 0.03;
+foot_correction_L = (R * [0; foot_correction_mag; 0]).*[1;1;0];
+foot_correction_R = (R * [0; -foot_correction_mag; 0]).*[1;1;0];
+foot_correction = [foot_correction_L; foot_correction_R; foot_correction_L; foot_correction_R];
+pd_foot = pd_foot + foot_correction;
 
 Fswing = Kp * (pd_foot - p_foot) + Kd * (vd_foot - v_foot);
 Fswing = -Fswing;
@@ -79,7 +85,7 @@ function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, 
 h = 0.05;
 dh = 2 * h / tswing;
 
-delta_h = 0.02;
+delta_h = 0.0;
 
 v_mag = 2 * h / tswing;
 
@@ -118,4 +124,7 @@ else
 end
 
 end
+
+
+%function [pd_foot, vd_foot] = calculate_foot_trajectory_biquad(t, )
 

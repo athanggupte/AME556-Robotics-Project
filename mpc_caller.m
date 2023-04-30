@@ -1,7 +1,7 @@
 function [tau, F] = mpc_caller(p, v, w, R, q, vd, p1, p2, p3, p4, t, task)
 
-N = 20; dt = 0.02;
-gait_length = 0.2;
+N = 20; dt = 0.015;
+gait_length = 0.15;
 tau = zeros(12,1);
 F = zeros(12,1);
 if t < 2
