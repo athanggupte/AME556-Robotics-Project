@@ -1,6 +1,7 @@
 function [tau, pd_foot, vd_foot, Fswing] = foot_placement_standing(p, R, v, p_hip, p_foot, v_foot, q, t)
 
-gait_length = 0.15;
+params = get_gait_params();
+gait_length = params.gait_length;
 Fswing = zeros(12, 1);
 tau = zeros(12, 1);
 
@@ -11,7 +12,7 @@ pd_foot = p_hip;% - [0.025; 0; 0;
                 %    0.025; 0; 0;
                 %    0.025; 0; 0;];
 vd_foot = zeros(12, 1);
-if t < 2
+if t < params.t_start
     return;
 end
 

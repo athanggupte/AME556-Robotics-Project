@@ -1,3 +1,4 @@
+% OLD CODE, NOT IN USE
 function u = mpc(q, Rot, I, r1, r2, r3, r4, phase, t, c)
     % Same MPC code as 2b except for constraints
     N = 10;

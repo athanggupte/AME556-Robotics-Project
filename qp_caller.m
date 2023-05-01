@@ -1,10 +1,11 @@
 function [tau, F] = qp_caller(p, v, w, R, q, p1, p2, p3, p4, t)
 
-N = 20; dt = 0.02;
-gait_length = 0.2;
+params = get_gait_params();
+gait_length = params.gait_length;
+N = params.N; dt = params.dt;
 tau = zeros(12,1);
 F = zeros(12,1);
-if t < 2
+if t < params.t_start
     return;
 end
 

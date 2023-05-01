@@ -1,10 +1,11 @@
 function [tau, F] = mpc_caller(p, v, w, R, q, vd, p1, p2, p3, p4, t, task)
 
-N = 20; dt = 0.015;
-gait_length = 0.15;
+params = get_gait_params();
+N = params.N; dt = params.dt;
+gait_length = params.gait_length;
 tau = zeros(12,1);
 F = zeros(12,1);
-if t < 2
+if t < params.t_start
     return;
 end
 
