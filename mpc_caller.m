@@ -44,6 +44,10 @@ elseif task == 2 % turning
     wd = [0; 0; 0.6];
     xd = [pd; thetad; pddot; wd];
     F = mpc_turning_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
+elseif task == 3 % walking sideways
+    pddot = vd;
+    xd = [pd; thetad; pddot; wd];
+    F = mpc_walking_sideways_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
 end
 
 % Convert GRF to Torque
