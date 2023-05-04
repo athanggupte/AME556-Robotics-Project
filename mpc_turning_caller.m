@@ -3,14 +3,14 @@ function u = mpc_turning_caller(t,q,r1,r2,r3,r4,xd,dt,N,gait_length)
          20, ... % px
          20, ... % py
          70, ... % pz
-         35, ... % roll
-         10, ... % pitch
+         300, ... % roll
+         300, ... % pitch
          0, ... % yaw
          4, ...  % vx
          4, ...  % vy
          4, ...  % vz
-         70, ... % wx
-         1, ...  % wy
+         300, ... % wx
+         300, ...  % wy
          100 ...  % wz
      ]);
      R_mpc = 0.00001*eye(12);

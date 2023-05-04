@@ -1,6 +1,6 @@
 function mpcTable = gait(t,N,dt,gait_length,gaitname)
     Nmul = 2 * gait_length / dt;
-    mpcTable = calc_gait(t, Nmul, dt, gaitname);
+    mpcTable = calc_gait(t, Nmul, dt, gaitname, gait_length);
     if Nmul < N
         mpcTable = [mpcTable; mpcTable(1:4*(N-Nmul))];
     else
@@ -8,7 +8,7 @@ function mpcTable = gait(t,N,dt,gait_length,gaitname)
     end
 end
 
-function mpcTable = calc_gait(t,N,dt,gaitname)
+function mpcTable = calc_gait(t,N,dt,gaitname, gait_length)
     if isequal(gaitname, 'standing')
         offsets = [0,0,0,0];
         duration = [N,N,N,N];
@@ -21,6 +21,9 @@ function mpcTable = calc_gait(t,N,dt,gaitname)
     elseif isequal(gaitname, 'bounding')
         offsets = [N/2,N/2,0,0];
         duration = [N/2,N/2,N/2,N/2];
+    elseif isequal(gaitname, 'running')
+        mpcTable = running_gait(t, N, dt, gait_length);
+        return;
     end
     mpcTable = zeros(N*4,1);
     iteration = floor(mod(t/dt,N));
