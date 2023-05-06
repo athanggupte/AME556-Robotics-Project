@@ -37,9 +37,7 @@ Kp = 135; Kd = 90;
 
 tswing = gait_length + dt;
 phase_start = phase_start - dt;
-phase_mask = gait(t, 1, dt, gait_length, 'running');
-is_flight_phase = isequal(phase_mask, [0;0;0;0]);
-[pd_foot, vd_foot] = calculate_foot_trajectory(t, dt, phase_start, is_flight_phase, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot);
+[pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot);
 
 foot_correction_mag = 0.03;
 foot_correction_L = (R * [0; foot_correction_mag; 0]).*[1;1;0];
@@ -86,51 +84,25 @@ tau = [tau(12); tau(9); tau(6); tau(3); tau(11); tau(8); tau(5); tau(2); tau(10)
 end
 
 
-function [pd_foot, vd_foot] = calculate_foot_trajectory(t, dt, phase_start, is_flight_phase, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot)
+function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot)
 
-    h = 0.05;
-    dh = 2 * h / tswing;
-    
-    h_correction = 0.0;
-    
-    v_mag = 2 * h / tswing;
+h = 0.05;
+dh = 2 * h / tswing;
 
-    next_phase_start = phase_start + tswing - dt;
-    
-    if phase == 0 % FL, RR in flight
-        [pd_foot, vd_foot] = calculate_foot_trajectory_FL_RR(t, phase_start, tswing, pd_foot, vd_foot, pdelta_foot, p_foot, h, dh, v_mag, h_correction);
-    end
-    if phase == 1 % FR, RL in flight
-        [pd_foot, vd_foot] = calculate_foot_trajectory_FR_RL(t, phase_start, tswing, pd_foot, vd_foot, pdelta_foot, p_foot, h, dh, v_mag, h_correction);
-    end
-    if phase == 0 && is_flight_phase
-        [pd_foot, vd_foot] = calculate_foot_trajectory_FR_RL(t, next_phase_start, tswing, pd_foot, vd_foot, pdelta_foot, p_foot, h, dh, v_mag, h_correction);
-    end
-    if phase == 1 && is_flight_phase
-        [pd_foot, vd_foot] = calculate_foot_trajectory_FL_RR(t, next_phase_start, tswing, pd_foot, vd_foot, pdelta_foot, p_foot, h, dh, v_mag, h_correction);
-    end
+delta_h = 0.0;
 
+v_mag = 2 * h / tswing;
+
+phase_mask = running_gait(t, 1, dt, gait_length);
+is_flight_phase = isequal(phase_mask, [0;0;0;0]);
+
+if phase == 0 % FL, RR in flight
+    [pd_foot, vd_foot] = calculate_foot_trajectory_FL_RR(t, phase_start, tswing, pd_foot, vd_foot, pdelta_foot, p_foot);
 end
+if phase == 1
+    calculate_foot_trajectory_FR_RL()
+elseif phase == 0 && is_flight_phase
 
-function [pd_foot, vd_foot] = calculate_foot_trajectory_FL_RR(t, phase_start, tswing, pd_foot, vd_foot, pdelta_foot, p_foot, h, dh, v_mag, h_correction)
-    pd_foot(1) = p_foot(1) + (t-phase_start) * pdelta_foot(1) / tswing;
-    pd_foot(10) = p_foot(10) + (t-phase_start) *  pdelta_foot(10) / tswing;
-    vd_foot(1) = pdelta_foot(1) / tswing;
-    vd_foot(10) = pdelta_foot(10) / tswing;
-    if t < (phase_start + tswing/2)
-        pd_foot(3) = (t-phase_start)*dh;
-        pd_foot(12) = (t-phase_start)*dh;
-        vd_foot(3) = v_mag;
-        vd_foot(12) = v_mag;
-    else
-        pd_foot(3) = h - (t-phase_start-tswing/2)*dh - h_correction;
-        pd_foot(12) = h - (t-phase_start-tswing/2)*dh - h_correction;
-        vd_foot(3) = -v_mag;
-        vd_foot(12) = -v_mag;
-    end
-end
-
-function [pd_foot, vd_foot] = calculate_foot_trajectory_FR_RL(t, phase_start, tswing, pd_foot, vd_foot, pdelta_foot, p_foot, h, dh, v_mag, h_correction)
     pd_foot(4) = p_foot(4) + (t-phase_start) * pdelta_foot(4) / tswing;
     pd_foot(7) = p_foot(7) + (t-phase_start) * pdelta_foot(7) / tswing;
     vd_foot(4) = pdelta_foot(4) / tswing;
@@ -141,8 +113,63 @@ function [pd_foot, vd_foot] = calculate_foot_trajectory_FR_RL(t, phase_start, ts
         vd_foot(6) = v_mag;
         vd_foot(9) = v_mag;
     else
-        pd_foot(6) = h - (t-phase_start-tswing/2)*dh - h_correction;
-        pd_foot(9) = h - (t-phase_start-tswing/2)*dh - h_correction;
+        pd_foot(6) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        pd_foot(9) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        vd_foot(6) = -v_mag;
+        vd_foot(9) = -v_mag;
+    end
+elseif phase == 1 && is_flight_phase
+    pd_foot(1) = p_foot(1) + (t-phase_start) * pdelta_foot(1) / tswing;
+    pd_foot(10) = p_foot(10) + (t-phase_start) *  pdelta_foot(10) / tswing;
+    vd_foot(1) = pdelta_foot(1) / tswing;
+    vd_foot(10) = pdelta_foot(10) / tswing;
+    if t < (phase_start + tswing/2)
+        pd_foot(3) = (t-phase_start)*dh;
+        pd_foot(12) = (t-phase_start)*dh;
+        vd_foot(3) = v_mag;
+        vd_foot(12) = v_mag;
+    else
+        pd_foot(3) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        pd_foot(12) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        vd_foot(3) = -v_mag;
+        vd_foot(12) = -v_mag;
+    end
+
+end
+
+end
+
+function [pd_foot, vd_foot] = calculate_foot_trajectory_FL_RR(t, phase_start, tswing, pd_foot, vd_foot, pdelta_foot, p_foot)
+    pd_foot(1) = p_foot(1) + (t-phase_start) * pdelta_foot(1) / tswing;
+    pd_foot(10) = p_foot(10) + (t-phase_start) *  pdelta_foot(10) / tswing;
+    vd_foot(1) = pdelta_foot(1) / tswing;
+    vd_foot(10) = pdelta_foot(10) / tswing;
+    if t < (phase_start + tswing/2)
+        pd_foot(3) = (t-phase_start)*dh;
+        pd_foot(12) = (t-phase_start)*dh;
+        vd_foot(3) = v_mag;
+        vd_foot(12) = v_mag;
+    else
+        pd_foot(3) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        pd_foot(12) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        vd_foot(3) = -v_mag;
+        vd_foot(12) = -v_mag;
+    end
+end
+
+function [pd_foot, vd_foot] = calculate_foot_trajectory_FR_RL(t, phase_start, tswing, pd_foot, vd_foot, pdelta_foot, p_foot)
+    pd_foot(4) = p_foot(4) + (t-phase_start) * pdelta_foot(4) / tswing;
+    pd_foot(7) = p_foot(7) + (t-phase_start) * pdelta_foot(7) / tswing;
+    vd_foot(4) = pdelta_foot(4) / tswing;
+    vd_foot(7) = pdelta_foot(7) / tswing;
+    if t < (phase_start + tswing/2)
+        pd_foot(6) = (t-phase_start)*dh;
+        pd_foot(9) = (t-phase_start)*dh;
+        vd_foot(6) = v_mag;
+        vd_foot(9) = v_mag;
+    else
+        pd_foot(6) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        pd_foot(9) = h - (t-phase_start-tswing/2)*dh - delta_h;
         vd_foot(6) = -v_mag;
         vd_foot(9) = -v_mag;
     end

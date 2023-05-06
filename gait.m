@@ -22,7 +22,7 @@ function mpcTable = calc_gait(t,N,dt,gaitname, gait_length)
         offsets = [N/2,N/2,0,0];
         duration = [N/2,N/2,N/2,N/2];
     elseif isequal(gaitname, 'running')
-        mpcTable = running_gait(t, N, dt, gait_length);
+        mpcTable = running_gait(t, N, dt, gait_length, get_gait_params().flight_length);
         return;
     end
     mpcTable = zeros(N*4,1);
