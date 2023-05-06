@@ -1,10 +1,12 @@
-function [tau, F] = mpc_caller(p, v, w, R, q, vd, wdesired, p1, p2, p3, p4, t, task)
+function [tau, F, gait_table] = mpc_caller(p, v, w, R, q, vd, wdesired, p1, p2, p3, p4, t, task)
 
 params = get_gait_params();
 N = params.N; dt = params.dt;
 gait_length = params.gait_length;
 tau = zeros(12,1);
 F = zeros(12,1);
+gait_table = zeros(4,1);
+
 if t < params.t_start
     return;
 end
@@ -47,7 +49,9 @@ elseif task == 2 % turning
 elseif task == 3 % running
     pddot = vd;
     xd = [pd; thetad; pddot; wd];
-    F = mpc_running_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length); 
+    gait_table = gait(t, N, dt, gait_length, 'running');
+    gait_table = gait_table(1:4);
+    F = mpc_running_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
 end
 
 % Convert GRF to Torque

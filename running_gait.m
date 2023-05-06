@@ -5,10 +5,12 @@ function mpcTable = running_gait(t, N, dt, gait_length)
     mpcTable = [];
     coder.varsize("mpcTable");
     t = t + dt;
-    [phase, phase_start] = get_current_phase_running(t, gait_length);
+    [phase, phase_start] = get_current_phase(t, gait_length);
     next_phase_start = phase_start + gait_length;
     for n=1:N
-        if t >= next_phase_start
+        if t < phase_start + dt
+            currentphase = flightphase;
+        elseif t >= next_phase_start
             [phase, ~] = get_current_phase(t, gait_length);
             currentphase = flightphase;
             next_phase_start = next_phase_start + gait_length;

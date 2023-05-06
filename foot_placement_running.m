@@ -7,7 +7,7 @@ tau = zeros(12, 1);
 vd_foot = zeros(12, 1);
 pfinal_foot = zeros(12, 1);
 
-[phase, phase_start] = get_current_phase_running(t, gait_length);
+[phase, phase_start] = get_current_phase(t, gait_length);
 
 pd_foot = p_hip;
 if t < params.t_start

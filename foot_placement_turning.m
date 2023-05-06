@@ -1,4 +1,4 @@
-function [tau, pd_foot, vd_foot, pfinal_foot, Fswing] = foot_placement_turning(p, R, v, p_hip, p_foot, v_foot, q, vd, w, t)
+function [tau, pd_foot, vd_foot, pfinal_foot, Fswing] = foot_placement_turning(p, R, v, p_hip, p_foot, v_foot, q, vd, wd, t)
 
 params = get_gait_params();
 gait_length = params.gait_length;
@@ -11,7 +11,6 @@ pfinal_foot = zeros(12, 1);
 
 pd_foot = p_hip;
 
-vd_foot = zeros(12, 1);
 if t < params.t_start
     return;
 end
@@ -35,19 +34,18 @@ K_step = sqrt(p(3) / 9.81);
 % pfinal_foot(9) = 0;
 % pfinal_foot(12) = 0;
 
-Kp = 135; Kd = 60;
+Kp = 120; Kd = 60;
 
 % phase_start = phase_start - gait_length;
 
 tswing = gait_length;
-[pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, w);
+[pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, wd);
 
-foot_correction_mag = 0.03;
-foot_correction_plus = (R * [0; foot_correction_mag; 0]).*[1;1;0];
-foot_correction_minus = (R * [0; -foot_correction_mag; 0]).*[1;1;0];
-foot_correction = [foot_correction_plus; foot_correction_plus; 
-                   foot_correction_minus; foot_correction_minus];
-pd_foot = pd_foot + foot_correction;
+% foot_correction_mag = 0.03;
+% foot_correction_L = (R * [0; foot_correction_mag; 0]).*[1;1;0];
+% foot_correction_R = (R * [0; -foot_correction_mag; 0]).*[1;1;0];
+% foot_correction = [foot_correction_L; foot_correction_R; foot_correction_L; foot_correction_R];
+% pd_foot = pd_foot + foot_correction;
 
 Fswing = Kp * (pd_foot - p_foot) + Kd * (vd_foot - v_foot);
 Fswing = -Fswing;
@@ -79,36 +77,17 @@ tau(7:9) = tau_RL(1:3);
 tau(10:12) = tau_RR(1:3);
 tau = [tau(12); tau(9); tau(6); tau(3); tau(11); tau(8); tau(5); tau(2); tau(10); tau(7); tau(4); tau(1)];
 
-% tau = tau.*[1-phase; phase; phase; 1-phase;
-%             1-phase; phase; phase; 1-phase;
-%             1-phase; phase; phase; 1-phase];
-
-
 end
 
 
-function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, w)
+function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, wd)
 
     h = 0.05;
     dh = 2 * h / tswing;
     delta_h = 0.0;
-%     v_foot = [cross(w, pd_foot(1:3)); cross(w, pd_foot(1:3)); cross(w, pd_foot(1:3)); cross(w, pd_foot(1:3));];
-%     w = 0.1;
-%     R = sqrt(pd_foot(1)^2 + pd_foot(2)^2);
-%     L = 0.3610; % distance between FL and RL hip locations
-%     alpha = acos((2*R^2 - 0.3610^2)/(2*R^2));
-%     theta = asin(pd_foot(2)/R);
     v_mag = 2 * h / tswing;
     
     if 1-phase == 1
-%         pd_foot(1) = pd_foot(1) + v_foot(1)*(t-phase_start);
-%         pd_foot(2) = pd_foot(2) + v_foot(2)*(t-phase_start);
-%         pd_foot(10) = pd_foot(10) + v_foot(10)*(t-phase_start);
-%         pd_foot(11) = pd_foot(11) + v_foot(11)*(t-phase_start);
-%         pd_foot(1) = R*cos(theta + w*(t-phase_start));
-%         pd_foot(2) = R*sin(theta + w*(t-phase_start));
-%         pd_foot(10) = R*cos(theta + pi + w*(t-phase_start));
-%         pd_foot(11) = R*sin(theta + pi + w*(t-phase_start));
         if t < (phase_start + tswing/2)
             pd_foot(3) = (t-phase_start)*dh;
             pd_foot(12) = (t-phase_start)*dh;
@@ -121,14 +100,6 @@ function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, 
             vd_foot(12) = -v_mag;
         end
     else
-%         pd_foot(4) = pd_foot(4) + v_foot(4)*(t-phase_start);
-%         pd_foot(5) = pd_foot(5) + v_foot(5)*(t-phase_start);
-%         pd_foot(7) = pd_foot(7) + v_foot(7)*(t-phase_start);
-%         pd_foot(8) = pd_foot(8) + v_foot(8)*(t-phase_start);
-%        pd_foot(4) = R*cos(theta + alpha + pi + w*(t-phase_start));
-%         pd_foot(5) = R*sin(theta + alpha + pi + w*(t-phase_start));
-%         pd_foot(7) = R*cos(theta + alpha + w*(t-phase_start));
-%         pd_foot(8) = R*sin(theta + alpha + w*(t-phase_start));
         if t < (phase_start + tswing/2)
             pd_foot(6) = (t-phase_start)*dh;
             pd_foot(9) = (t-phase_start)*dh;
