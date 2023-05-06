@@ -83,10 +83,10 @@ end
 function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot, p_hip, p_foot_initial)
 
 start_distance = 0.12;
-% fprintf("%f %f\n", p_foot_initial(1), get_next_step_start(p_foot_initial(1)));
+fprintf("%f %f\n", p_foot_initial(1), get_next_step_start(p_foot_initial(1)));
 if 1-phase == 1
     if get_next_step_start(p_foot_initial(1)) < start_distance
-        if get_next_step_start(p_foot_initial(10)) >= 0.4
+        if get_distance(p_foot_initial(1:3), p_foot_initial(7:9)) > 0.45
             [p, v] = calculate_trotting_trajectory(t, phase_start, pd_foot(1:3), p_foot(1:3), pdelta_foot(1:3), vd_foot(1:3), tswing);
             pd_foot(1:3) = p;
             vd_foot(1:3) = v;
@@ -111,7 +111,7 @@ if 1-phase == 1
     end        
 else
     if get_next_step_start(p_foot_initial(4)) < start_distance
-        if get_next_step_start(p_foot_initial(7)) >= 0.4
+        if get_distance(p_foot_initial(4:6), p_foot_initial(10:12)) > 0.45
             [p, v] = calculate_trotting_trajectory(t, phase_start, pd_foot(4:6), p_foot(4:6), pdelta_foot(4:6), vd_foot(4:6), tswing);
             pd_foot(4:6) = p;
             vd_foot(4:6) = v;

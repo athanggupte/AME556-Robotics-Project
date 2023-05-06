@@ -5,9 +5,9 @@ gait_length = params.gait_length;
 N = params.N; dt = params.dt;
 tau = zeros(12,1);
 F = zeros(12,1);
-if t < params.t_start
-    return;
-end
+% if t < params.t_start
+%     return;
+% end
 
 R = R';
 
@@ -30,7 +30,7 @@ J_RL = foot_jacobian([q(10); q(6); q(2)], 3);
 J_RR = foot_jacobian([q(9); q(5); q(1)], 4);
 
 % F = mpc(X, R, I, r1, r2, r3, r4, phase, t, c);
-pd = [0; 0; 0.25];
+pd = [0; 0; 0.28];
 pddot = [0; 0; 0];
 % m = 12;
 thetad = [0; 0; 0];

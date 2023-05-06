@@ -46,8 +46,11 @@ elseif task == 2 % turning
     F = mpc_turning_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
 elseif task == 5 % climbing
     pddot = vd;
+%     if t > 2.7
+        thetad = [0; max(-pi/6, (-pi/6)*t/2.7); 0;];
+%     end
     xd = [pd; thetad; pddot; wd];
-    F = mpc_walking_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
+    F = mpc_climbing_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
 end
 
 % Convert GRF to Torque

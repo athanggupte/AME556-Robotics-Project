@@ -4,7 +4,7 @@ function u = mpc_climbing_caller(t,q,r1,r2,r3,r4,xd,dt,N,gait_length)
          35, ... % py
          0, ... % pz
          350, ... % roll
-         350, ... % pitch
+         150, ... % pitch
          35, ... % yaw
          100, ...  % vx
          45, ...  % vy
