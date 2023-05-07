@@ -1,15 +1,15 @@
 function u = mpc_running_caller(t,q,r1,r2,r3,r4,xd,dt,N,gait_length)
      Q_mpc = diag([ ...
          0, ... % px
-         35, ... % py
-         80, ... % pz
-         350, ... % roll
-         10, ... % pitch
-         35, ... % yaw
-         100, ...  % vx
+         65, ... % py
+         170, ... % pz
+         150, ... % roll
+         40, ... % pitch
+         60, ... % yaw
+         180, ...  % vx
          45, ...  % vy
          4, ...  % vz
-         700, ... % wx
+         150, ... % wx
          10, ...  % wy
          70 ...  % wz
         ]);

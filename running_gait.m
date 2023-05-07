@@ -2,18 +2,19 @@ function mpcTable = running_gait(t, N, dt, gait_length, flight_length)
     phase0 = [0;1;1;0];
     phase1 = [1;0;0;1];
     flightphase = [0;0;0;0];
+    %mpcTable = zeros(4 * N);
     mpcTable = [];
     coder.varsize("mpcTable");
-    t = t + dt;
     [phase, phase_start] = get_current_phase(t, gait_length);
     next_phase_start = phase_start + gait_length;
-    for n=1:N
-        if t < phase_start + flight_length * dt
-            currentphase = flightphase;
-        elseif t >= next_phase_start 
+    t = t + dt;
+    for n=0:N-1
+%         if t < phase_start + flight_length * dt
+%             currentphase = flightphase;
+        if t >= next_phase_start - flight_length * dt + dt
             [phase, ~] = get_current_phase(t, gait_length);
             currentphase = flightphase;
-            if t >= next_phase_start + flight_length * dt - dt
+            if t >= next_phase_start
                 next_phase_start = next_phase_start + gait_length;
             end
         elseif phase == 0
@@ -22,6 +23,7 @@ function mpcTable = running_gait(t, N, dt, gait_length, flight_length)
             currentphase = phase1;
         end
         mpcTable = [mpcTable; currentphase];
+        % mpcTable(4*n+1:4*n+4) = currentphase;
         t = t + dt;
     end
 end

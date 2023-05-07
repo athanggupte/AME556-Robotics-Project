@@ -5,6 +5,6 @@ function params = get_gait_params()
     params.dt = 0.015;
     params.gait_length = params.N * params.dt/2;
     params.t_start = 2 - mod(2, params.gait_length);
-    params.flight_length = 1;
+    params.flight_length = 2;
 end
 

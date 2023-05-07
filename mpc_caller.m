@@ -49,8 +49,8 @@ elseif task == 2 % turning
 elseif task == 3 % running
     pddot = vd;
     xd = [pd; thetad; pddot; wd];
-    gait_table = gait(t, N, dt, gait_length, 'running');
-    gait_table = gait_table(1:4);
+    %gait_table = running_gait(t, 1, dt, gait_length, params.flight_length);
+    gait_table(1:4) = running_gait(t-dt, 1, dt, gait_length, params.flight_length);
     F = mpc_running_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
 end
 
