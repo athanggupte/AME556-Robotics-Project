@@ -1,4 +1,5 @@
-function [tau, pd_foot, vd_foot, pfinal_foot, Fswing] = foot_placement_climbing(p, R, v, p_hip, p_foot_initial, p_foot, v_foot, q, vd, t)
+function [tau, pd_foot, vd_foot, pfinal_foot, Fswing] = foot_placement_climbing(p, ...
+    R, v, p_hip, p_foot_initial, p_foot, v_foot, q, vd, t)
 
 params = get_gait_params();
 gait_length = params.gait_length;
@@ -34,12 +35,14 @@ Kp = 135; Kd = 90;
 % phase_start = phase_start - gait_length;
 
 tswing = gait_length;
-[pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot, p_hip, p_foot_initial);
+[pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, ...
+    pd_foot, vd_foot, pdelta_foot, p_foot, p_hip, p_foot_initial);
 
 foot_correction_mag = 0.03;
 foot_correction_L = (R * [0; foot_correction_mag; 0]).*[1;1;0];
 foot_correction_R = (R * [0; -foot_correction_mag; 0]).*[1;1;0];
-foot_correction = [foot_correction_L; foot_correction_R; foot_correction_L; foot_correction_R];
+foot_correction = [foot_correction_L; foot_correction_R;
+    foot_correction_L; foot_correction_R];
 pd_foot = pd_foot + foot_correction;
 
 Fswing = Kp * (pd_foot - p_foot) + Kd * (vd_foot - v_foot);
@@ -70,7 +73,8 @@ tau(1:3) = tau_FL(1:3);
 tau(4:6) = tau_FR(1:3);
 tau(7:9) = tau_RL(1:3);
 tau(10:12) = tau_RR(1:3);
-tau = [tau(12); tau(9); tau(6); tau(3); tau(11); tau(8); tau(5); tau(2); tau(10); tau(7); tau(4); tau(1)];
+tau = [tau(12); tau(9); tau(6); tau(3); tau(11); tau(8); tau(5); tau(2);
+    tau(10); tau(7); tau(4); tau(1)];
 
 % tau = tau.*[1-phase; phase; phase; 1-phase;
 %             1-phase; phase; phase; 1-phase;
@@ -80,57 +84,70 @@ tau = [tau(12); tau(9); tau(6); tau(3); tau(11); tau(8); tau(5); tau(2); tau(10)
 end
 
 
-function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, phase, pd_foot, vd_foot, pdelta_foot, p_foot, p_hip, p_foot_initial)
+function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, ...
+    phase, pd_foot, vd_foot, pdelta_foot, p_foot, p_hip, p_foot_initial)
 
-start_distance = 0.12;
+start_distance = 0.1;
 % fprintf("%f %f\n", p_foot_initial(1), get_next_step_start(p_foot_initial(1)));
 if 1-phase == 1
     if get_next_step_start(p_foot_initial(1)) < start_distance
-        if get_next_step_start(p_foot_initial(10)) >= 0.4
-            [p, v] = calculate_trotting_trajectory(t, phase_start, pd_foot(1:3), p_foot(1:3), pdelta_foot(1:3), vd_foot(1:3), tswing);
+        if get_next_step_start(p_foot_initial(10)) >= 0.4 % abs(p_foot_initial(6) - p_foot_initial(9)) >  0.12 % 
+            [p, v] = calculate_trotting_trajectory(t, phase_start, pd_foot(1:3), ...
+                p_foot(1:3), pdelta_foot(1:3), vd_foot(1:3), tswing);
             pd_foot(1:3) = p;
             vd_foot(1:3) = v;
+%             vd_foot(1:3) = zeros(3, 1);
         else
-            [p, v] = calculate_climbing_trajectory(t, phase_start, pd_foot(1:3), p_foot(1:3), vd_foot(1:3), p_foot_initial(1:3), tswing);
+            [p, v] = calculate_climbing_trajectory(t, phase_start, pd_foot(1:3), ...
+                p_foot(1:3), vd_foot(1:3), p_foot_initial(1:3), tswing);
             pd_foot(1:3) = p;
             vd_foot(1:3) = v;
         end
     else
-        [p, v] = calculate_walking_trajectory(t, phase_start, pd_foot(1:3), p_foot(1:3), pdelta_foot(1:3), vd_foot(1:3), tswing);
+        [p, v] = calculate_walking_trajectory(t, phase_start, pd_foot(1:3), ...
+            p_foot(1:3), pdelta_foot(1:3), vd_foot(1:3), tswing, 0);
         pd_foot(1:3) = p;
         vd_foot(1:3) = v;
     end
-    if get_next_step_start(p_foot_initial(10)) < start_distance
-        [p, v] = calculate_climbing_trajectory(t, phase_start, pd_foot(10:12), p_foot(10:12), vd_foot(10:12), p_foot_initial(10:12), tswing);
+    if get_next_step_start(p_foot_initial(10)) < start_distance + 0.02
+        [p, v] = calculate_climbing_trajectory(t, phase_start, pd_foot(10:12), ...
+            p_foot(10:12), vd_foot(10:12), p_foot_initial(10:12), tswing);
         pd_foot(10:12) = p;
         vd_foot(10:12) = v;
     else
-        [p, v] = calculate_walking_trajectory(t, phase_start, pd_foot(10:12), p_foot(10:12), pdelta_foot(10:12), vd_foot(10:12), tswing);
+        [p, v] = calculate_walking_trajectory(t, phase_start, pd_foot(10:12), ...
+            p_foot(10:12), pdelta_foot(10:12), vd_foot(10:12), tswing, 1);
         pd_foot(10:12) = p;
         vd_foot(10:12) = v;
     end        
 else
     if get_next_step_start(p_foot_initial(4)) < start_distance
-        if get_next_step_start(p_foot_initial(7)) >= 0.4
-            [p, v] = calculate_trotting_trajectory(t, phase_start, pd_foot(4:6), p_foot(4:6), pdelta_foot(4:6), vd_foot(4:6), tswing);
+        if  get_next_step_start(p_foot_initial(7)) >= 0.4 % abs(p_foot_initial(6) - p_foot_initial(9)) >  0.12 %
+            [p, v] = calculate_trotting_trajectory(t, phase_start, pd_foot(4:6), ...
+                p_foot(4:6), pdelta_foot(4:6), vd_foot(4:6), tswing);
             pd_foot(4:6) = p;
             vd_foot(4:6) = v;
+%               vd_foot(4:6) = zeros(3, 1);
         else
-            [p, v] = calculate_climbing_trajectory(t, phase_start, pd_foot(4:6), p_foot(4:6), vd_foot(4:6), p_foot_initial(4:6), tswing);
+            [p, v] = calculate_climbing_trajectory(t, phase_start, pd_foot(4:6), ...
+                p_foot(4:6), vd_foot(4:6), p_foot_initial(4:6), tswing);
             pd_foot(4:6) = p;
             vd_foot(4:6) = v;
         end
     else
-        [p, v] = calculate_walking_trajectory(t, phase_start, pd_foot(4:6), p_foot(4:6), pdelta_foot(4:6), vd_foot(4:6), tswing);
+        [p, v] = calculate_walking_trajectory(t, phase_start, pd_foot(4:6), ...
+            p_foot(4:6), pdelta_foot(4:6), vd_foot(4:6), tswing, 0);
         pd_foot(4:6) = p;
         vd_foot(4:6) = v;
     end
-    if get_next_step_start(p_foot_initial(7)) < start_distance
-        [p, v] = calculate_climbing_trajectory(t, phase_start, pd_foot(7:9), p_foot(7:9), vd_foot(7:9), p_foot_initial(7:9), tswing);
+    if get_next_step_start(p_foot_initial(7)) < start_distance + 0.02
+        [p, v] = calculate_climbing_trajectory(t, phase_start, pd_foot(7:9), ...
+            p_foot(7:9), vd_foot(7:9), p_foot_initial(7:9), tswing);
         pd_foot(7:9) = p;
         vd_foot(7:9) = v;
     else
-        [p, v] = calculate_walking_trajectory(t, phase_start, pd_foot(7:9), p_foot(7:9), pdelta_foot(7:9), vd_foot(7:9), tswing);
+        [p, v] = calculate_walking_trajectory(t, phase_start, pd_foot(7:9), ...
+            p_foot(7:9), pdelta_foot(7:9), vd_foot(7:9), tswing, 1);
         pd_foot(7:9) = p;
         vd_foot(7:9) = v;
     end
@@ -138,41 +155,47 @@ end
 
 end
 
-function [pd_foot, vd_foot] = calculate_trotting_trajectory(t, phase_start, pd_foot, p_foot, pdelta_foot, vd_foot, tswing)
+function [pd_foot, vd_foot] = calculate_trotting_trajectory(t, phase_start, ...
+    pd_foot, p_foot, pdelta_foot, vd_foot, tswing)
     h = 0.05;
     dh = 2 * h / tswing;
     
-    delta_h = 0.0;
+    height_correction = 0.02;
     
     v_mag = 2 * h / tswing;
     if t < (phase_start + tswing/2)
-        pd_foot(3) = (t-phase_start)*dh;
+        pd_foot(3) = (t-phase_start)*dh + height_correction;
         vd_foot(3) = v_mag;
     else
-        pd_foot(3) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        pd_foot(3) = h - (t-phase_start-tswing/2)*dh + height_correction;
         vd_foot(3) = -v_mag;
     end
 end
 
-function [pd_foot, vd_foot] = calculate_walking_trajectory(t, phase_start, pd_foot, p_foot, pdelta_foot, vd_foot, tswing)
+function [pd_foot, vd_foot] = calculate_walking_trajectory(t, phase_start, ...
+    pd_foot, p_foot, pdelta_foot, vd_foot, tswing, is_rear_leg)
     h = 0.05;
     dh = 2 * h / tswing;
     
-    delta_h = 0.0;
+    height_correction = 0.02;
     
     v_mag = 2 * h / tswing;
+    if is_rear_leg
+        pdelta_foot = pdelta_foot + 0.1;
+    end
     pd_foot(1) = p_foot(1) + (t-phase_start) * pdelta_foot(1) / tswing;
     vd_foot(1) = pdelta_foot(1) / tswing;
     if t < (phase_start + tswing/2)
-        pd_foot(3) = (t-phase_start)*dh;
+        pd_foot(3) = (t-phase_start)*dh + height_correction;
         vd_foot(3) = v_mag;
     else
-        pd_foot(3) = h - (t-phase_start-tswing/2)*dh - delta_h;
+        pd_foot(3) = h - (t-phase_start-tswing/2)*dh + height_correction;
         vd_foot(3) = -v_mag;
     end
 end
 
-function [pd_foot, vd_foot] = calculate_climbing_trajectory(t, phase_start, pd_foot, p_foot, vd_foot, p_foot_initial, tswing)
+function [pd_foot, vd_foot] = calculate_climbing_trajectory(t, phase_start, ...
+    pd_foot, p_foot, vd_foot, p_foot_initial, tswing)
     
     next_step_height = 0;
     while p_foot_initial(3) - next_step_height > 0
@@ -183,15 +206,18 @@ function [pd_foot, vd_foot] = calculate_climbing_trajectory(t, phase_start, pd_f
     dh = 2 * (h - p_foot_initial(3)) / tswing;
     h_correction = 0.0;
     v_mag = dh;
-    d_x = 0.175;
-    
+    d_x = 0.18;
+    d_x_rev = 0.03;
+
     if t < phase_start+tswing/2
-        pd_foot(3) = p_foot_initial(3) + (t-phase_start)*dh;
+        pd_foot(3) = p_foot_initial(3) + (t-phase_start)*dh + h_correction;
         vd_foot(3) = v_mag;
+        pd_foot(1) = p_foot_initial(1) - (t-phase_start) * d_x_rev * 2 / tswing;
+        vd_foot(1) = - d_x_rev * 2 / tswing;
     else
         dh2 = 2 * (h - next_step_height) / tswing;
         v_mag2 = dh2;
-        pd_foot(3) = h - (t-phase_start-tswing/2)*dh2 - h_correction;
+        pd_foot(3) = h - (t-phase_start-tswing/2)*dh2 + h_correction;
         vd_foot(3) = -v_mag2;
         pd_foot(1) = p_foot_initial(1) + (t-phase_start-tswing/2) * d_x * 2 / tswing;
         vd_foot(1) = 2 * d_x / tswing;

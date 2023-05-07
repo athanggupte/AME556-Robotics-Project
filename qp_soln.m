@@ -35,7 +35,9 @@ function u = qp_soln(q,r1,r2,r3,r4, xd)
     Aqp = blkdiag(Aqp_block,Aqp_block,Aqp_block,Aqp_block);
     bqp_block = [0;0;0;0;500;-10];
     bqp = [bqp_block;bqp_block;bqp_block;bqp_block];
-%     options = optimoptions('quadprog','Display','off');
+    options = optimset('Display','off');
+    coder.extrinsic('warning');
+    warning('off');
     coder.extrinsic('quadprog');
-    u = quadprog(H,f,Aqp,bqp,[],[],[],[],[]);
+    u = quadprog(H,f,Aqp,bqp,[],[],[],[],[], options);
 end

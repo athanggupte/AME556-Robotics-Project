@@ -89,8 +89,10 @@ function u = mpc_soln(t,q,r1,r2,r3,r4,xd,Q_mpc,R_mpc,dt,N,gait_length,gaitname)
     end
 %     b_ineq = bineq(2:end);
     coder.extrinsic('quadprog');
-%     options = optimoptions('quadprog','Display','off');
-    X_star = quadprog(H,f,A_ineq,b_ineq,Aeq,Beq,[],[],[]);
+    options = optimset('Display','off');
+    coder.extrinsic('warning');
+    warning('off');
+    X_star = quadprog(H,f,A_ineq,b_ineq,Aeq,Beq,[],[],[], options);
     u = X_star(N*state_num+1:N*state_num+controller_num);
 end
 

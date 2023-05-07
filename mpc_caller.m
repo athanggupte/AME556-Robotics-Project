@@ -1,10 +1,11 @@
-function [tau, F] = mpc_caller(p, v, w, R, q, vd, p1, p2, p3, p4, t, task)
+function [tau, F, z] = mpc_caller(p, v, w, R, q, vd, p1, p2, p3, p4, t, task)
 
 params = get_gait_params();
 N = params.N; dt = params.dt;
 gait_length = params.gait_length;
 tau = zeros(12,1);
 F = zeros(12,1);
+z=0;
 if t < params.t_start
     return;
 end
@@ -36,19 +37,36 @@ wd = [0; 0; 0;];
 if task == 0 % standing
     xd = [pd; thetad; pddot; wd];
     F = mpc_standing_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
+    z=0;
 elseif task == 1 % walking
     pddot = vd;
     xd = [pd; thetad; pddot; wd];
     F = mpc_walking_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
+    z = 0;
 elseif task == 2 % turning
     wd = [0; 0; 0.6];
     xd = [pd; thetad; pddot; wd];
     F = mpc_turning_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
+    z=0;
 elseif task == 5 % climbing
     pddot = vd;
 %     if t > 2.7
-        thetad = [0; max(-pi/6, (-pi/6)*t/2.7); 0;];
+%         thetad = [0; max(-pi/6, (-pi/6)*t/2.7); 0;];
 %     end
+    W = [1, p1(1), p1(2);
+        1, p2(1), p2(2);
+        1, p3(1), p3(2);
+        1, p4(1), p4(2);];
+    a = pinv(W'*W)*W'*[p1(3); p2(3); p3(3); p4(3)];
+    z = a(1) + a(2)*p(1) + a(3)*p(2) - 0.02;
+%     fprintf("%f\n", sqrt(1 + a(2)^2 + a(3)^2));
+    thetad(2) =  -pi/6;% - acos(1/sqrt(1 + a(2)^2 + a(3)^2));
+    fprintf("t %f theta %f cos(theta) %f pcos %f z %f\n", t, ...
+        acos(1/sqrt(1 + a(2)^2 + a(3)^2)), cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))), pd(3)*cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))), z/2);
+    pd(3) = pd(3)*cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))) + z/2;
+    
+    
+%     pd(3) = pd(3)*cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2)));
     xd = [pd; thetad; pddot; wd];
     F = mpc_climbing_caller(t, X, r1, r2, r3, r4, xd, dt, N, gait_length);
 end
