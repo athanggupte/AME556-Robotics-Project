@@ -30,10 +30,10 @@ J_RL = foot_jacobian([q(10); q(6); q(2)], 3);
 J_RR = foot_jacobian([q(9); q(5); q(1)], 4);
 
 % F = mpc(X, R, I, r1, r2, r3, r4, phase, t, c);
-pd = [0.2; 0; 0.24];
+pd = [0; 0; 0.28];
 pddot = [0; 0; 0];
 % m = 12;
-thetad = [0; -pi/6; 0];
+thetad = [0; 0; 0];
 wd = [0; 0; 0;];
 xd = [pd; thetad; pddot; wd];
 X = [p; reshape(R, [9 1]); v; R'*w];

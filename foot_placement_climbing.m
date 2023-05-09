@@ -87,7 +87,7 @@ end
 function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, ...
     phase, pd_foot, vd_foot, pdelta_foot, p_foot, p_hip, p_foot_initial)
 
-start_distance = 0.1;
+start_distance = 0.12;
 % for i=1:3:10
 %     if abs(get_next_step_start(p_foot_initial(i)) - get_next_step_start2(p_foot_initial(i:i+2))) > 1e-3
 %         fprintf("i %f x %f y %f z %f\n", i, p_foot_initial(i), p_foot_initial(i+1), p_foot_initial(i+2));
@@ -258,7 +258,7 @@ function [pd_foot, vd_foot] = calculate_climbing_trajectory2(t, phase_start, ...
     pd_foot, p_foot, vd_foot, p_foot_initial, tswing)
     
     h = 0.02;
-    d_x = 0.12;
+    d_x = 0.14;
 
     t_s = 0.1;
     t = t-phase_start;
@@ -266,10 +266,10 @@ function [pd_foot, vd_foot] = calculate_climbing_trajectory2(t, phase_start, ...
     pd_foot(1) = p_foot_initial(1) + 6*d_x/tswing^5*t^5 - 15*d_x/tswing^4*t^4 + 10*d_x/tswing^3*t^3;
     vd_foot(1) = 30*d_x/tswing^5*t^4 - 60*d_x/tswing^4*t^3 + 30*d_x/tswing^3*t^2;
     if t < t_s
-        pd_foot(3) = p_foot_initial(3) + 6*(0.1 + h)/t_s^5*t^5 - 15*(0.1 + h)/t_s^4*t^4 + 10*(0.1 + h)/t_s^3*t^3;
-        vd_foot(3) = 30*(0.1 + h)/t_s^5*t^4 - 60*(0.1 + h)/t_s^4*t^3 + 30*(0.1 + h)/t_s^3*t^2;
+        pd_foot(3) = p_foot_initial(3) + 6*(0.2 + h)/t_s^5*t^5 - 15*(0.2 + h)/t_s^4*t^4 + 10*(0.2 + h)/t_s^3*t^3;
+        vd_foot(3) = 30*(0.2 + h)/t_s^5*t^4 - 60*(0.2 + h)/t_s^4*t^3 + 30*(0.2 + h)/t_s^3*t^2;
     else
-        pd_foot(3) = p_foot_initial(3) - 6*h/(tswing-t_s)^5*(t-t_s)^5+15*h/(tswing-t_s)^4*(t-t_s)^4-10*h/(tswing-t_s)^3*(t-t_s)^3+0.1+h;
+        pd_foot(3) = p_foot_initial(3) - 6*h/(tswing-t_s)^5*(t-t_s)^5+15*h/(tswing-t_s)^4*(t-t_s)^4-10*h/(tswing-t_s)^3*(t-t_s)^3+0.2+h;
         vd_foot(3) = -30*h/(tswing-t_s)^5*(t-t_s)^4+60*h/(tswing-t_s)^4*(t-t_s)^3-30*h/(tswing-t_s)^3*(t-t_s)^2;
     end
 
@@ -288,11 +288,11 @@ function distance = get_next_step_start(p_foot_x)
 end
 
 function distance = get_next_step_start2(p_foot_initial)
-    start = 0.4; 
+    start = 1.0; 
     height = 0;
     while p_foot_initial(3) - 0.02 - height > 1e-2
         height = height + 0.1;
-        start = start + 0.2;
+        start = start + 1.2;
     end
 %     fprintf("p_foot_initial_z %f start %f height %f\n", p_foot_initial(3), start, height);
     distance = start - p_foot_initial(1);
