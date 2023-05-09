@@ -88,10 +88,16 @@ function [pd_foot, vd_foot] = calculate_foot_trajectory(t, phase_start, tswing, 
     phase, pd_foot, vd_foot, pdelta_foot, p_foot, p_hip, p_foot_initial)
 
 start_distance = 0.1;
+% for i=1:3:10
+%     if abs(get_next_step_start(p_foot_initial(i)) - get_next_step_start2(p_foot_initial(i:i+2))) > 1e-3
+%         fprintf("i %f x %f y %f z %f\n", i, p_foot_initial(i), p_foot_initial(i+1), p_foot_initial(i+2));
+%         fprintf("old %f new %f\n", get_next_step_start(p_foot_initial(i)), get_next_step_start2(p_foot_initial(i:i+2)));
+%     end
+% end
 % fprintf("%f %f\n", p_foot_initial(1), get_next_step_start(p_foot_initial(1)));
 if 1-phase == 1
-    if get_next_step_start(p_foot_initial(1)) < start_distance
-        if get_next_step_start(p_foot_initial(10)) >= 0.5 % abs(p_foot_initial(6) - p_foot_initial(9)) >  0.12 % 
+    if get_next_step_start2(p_foot_initial(1:3)) < start_distance
+        if get_next_step_start2(p_foot_initial(10:12)) >= 0.5 % abs(p_foot_initial(6) - p_foot_initial(9)) >  0.12 % 
             % TROTTING IN PLACE
             [p, v] = calculate_walking_trajectory2(t, phase_start, pd_foot(1:3), ...
                 p_foot_initial(1:3), pdelta_foot(1:3), vd_foot(1:3), tswing, 0);
@@ -110,7 +116,7 @@ if 1-phase == 1
         pd_foot(1:3) = p;
         vd_foot(1:3) = v;
     end
-    if get_next_step_start(p_foot_initial(10)) < start_distance
+    if get_next_step_start2(p_foot_initial(10:12)) < start_distance
         [p, v] = calculate_climbing_trajectory2(t, phase_start, pd_foot(10:12), ...
             p_foot(10:12), vd_foot(10:12), p_foot_initial(10:12), tswing);
         pd_foot(10:12) = p;
@@ -122,8 +128,8 @@ if 1-phase == 1
         vd_foot(10:12) = v;
     end        
 else
-    if get_next_step_start(p_foot_initial(4)) < start_distance
-        if  get_next_step_start(p_foot_initial(7)) >= 0.5 % abs(p_foot_initial(6) - p_foot_initial(9)) >  0.12 %
+    if get_next_step_start2(p_foot_initial(4:7)) < start_distance
+        if  get_next_step_start2(p_foot_initial(7:9)) >= 0.5 % abs(p_foot_initial(6) - p_foot_initial(9)) >  0.12 %
             % TROTTING IN PLACE
             [p, v] = calculate_walking_trajectory2(t, phase_start, pd_foot(4:6), ...
                 p_foot_initial(4:6), pdelta_foot(4:6), vd_foot(4:6), tswing, 0);
@@ -142,7 +148,7 @@ else
         pd_foot(4:6) = p;
         vd_foot(4:6) = v;
     end
-    if get_next_step_start(p_foot_initial(7)) < start_distance
+    if get_next_step_start2(p_foot_initial(7:9)) < start_distance
         [p, v] = calculate_climbing_trajectory2(t, phase_start, pd_foot(7:9), ...
             p_foot(7:9), vd_foot(7:9), p_foot_initial(7:9), tswing);
         pd_foot(7:9) = p;
@@ -279,6 +285,17 @@ function distance = get_next_step_start(p_foot_x)
         start = start + 0.2;
     end
     distance = start - p_foot_x;
+end
+
+function distance = get_next_step_start2(p_foot_initial)
+    start = 0.4; 
+    height = 0;
+    while p_foot_initial(3) - 0.02 - height > 1e-2
+        height = height + 0.1;
+        start = start + 0.2;
+    end
+%     fprintf("p_foot_initial_z %f start %f height %f\n", p_foot_initial(3), start, height);
+    distance = start - p_foot_initial(1);
 end
 
 %function [pd_foot, vd_foot] = calculate_foot_trajectory_biquad(t, )

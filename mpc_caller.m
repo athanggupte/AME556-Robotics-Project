@@ -65,7 +65,10 @@ elseif task == 5 % climbing
         acos(1/sqrt(1 + a(2)^2 + a(3)^2)), cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))), ...
         pd(3)*cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))), z);
     pd(3) = pd(3)*cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))) + z;
-    
+%     if p(1) - min(p3(1), p4(1)) > 0.2
+%         fprintf("t %f pd(1) %f p3(1) %f p4(1) %f\n", t, p(1), p3(1), p4(1));
+%         pddot = [0; 0; 0;];
+%     end
     
 %     pd(3) = pd(3)*cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2)));
     xd = [pd; thetad; pddot; wd];
