@@ -251,7 +251,7 @@ end
 function [pd_foot, vd_foot] = calculate_climbing_trajectory2(t, phase_start, ...
     pd_foot, p_foot, vd_foot, p_foot_initial, tswing)
     
-    h = 0.02;
+    h = 0.025;
     d_x = 0.12;
 
     t_s = 0.1;

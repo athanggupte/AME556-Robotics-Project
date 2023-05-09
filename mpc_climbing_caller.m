@@ -5,13 +5,13 @@ function u = mpc_climbing_caller(t,q,r1,r2,r3,r4,xd,dt,N,gait_length)
          150, ... % pz
          50, ... % roll
          150, ... % pitch
-         35, ... % yaw
+         50, ... % yaw
          100, ...  % vx
          80, ...  % vy
          4, ...  % vz
-         100, ... % wx
+         50, ... % wx
          10, ...  % wy
-         10 ...  % wz
+         50 ...  % wz
         ]);
      R_mpc = 0.00001*eye(12);
 %      gaitname = 'standing';

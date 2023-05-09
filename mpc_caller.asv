@@ -61,10 +61,10 @@ elseif task == 5 % climbing
     z = a(1) + a(2)*p(1) + a(3)*p(2) - 0.02;
 %     fprintf("%f\n", sqrt(1 + a(2)^2 + a(3)^2));
     thetad(2) =  -pi/6;% - acos(1/sqrt(1 + a(2)^2 + a(3)^2));
-    fprintf("t %f theta %f cos(theta) %f pcos %f z %f\n", t, ...
+    fprintf("t %f theta %f cos(theta) %f p/cos %f z %f\n", t, ...
         acos(1/sqrt(1 + a(2)^2 + a(3)^2)), cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))), ...
-        pd(3)*cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))), z);
-    pd(3) = pd(3)*cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))) + z;
+        pd(3)/cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))), z);
+    pd(3) = pd(3)/cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2))) + z;
     
     
 %     pd(3) = pd(3)*cos(acos(1/sqrt(1 + a(2)^2 + a(3)^2)));
